@@ -40,4 +40,14 @@ fn main() {
     let r2 = 1 + if let Some(x) = i { x } else { 0 };
 
     println!("r2 = {}", r2);
+
+    let m = Some(Message::Quit);
+    if let Some(x) = m {
+        x.print();
+    };
+
+    let mut m = Some(Message::Quit);
+    m.expect("Was none").print();
+    m = None;
+    m.expect("Was none").print();
 }
