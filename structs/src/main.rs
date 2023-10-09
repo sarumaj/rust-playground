@@ -32,45 +32,46 @@ impl Rectangle {
 }
 
 fn main() {
-    let mut _user1 = User {
+    let mut _user1: User = User {
         active: true,
         username: String::from("user1"),
         email: String::from("user1@example.com"),
         sign_in_count: 1,
     };
 
+    _user1.username;
     _user1.email = String::from("anotheremail@example.com");
-    _user1.active = true;
-    _user1.sign_in_count = 1;
+    _user1.active;
+    _user1.sign_in_count;
 
-    let _user2 = build_user(String::from("user2"), String::from("user2@example.com"));
+    let _user2: User = build_user(String::from("user2"), String::from("user2@example.com"));
 
-    let _user3 = User {
+    let _user3: User = User {
         username: String::from("user3"),
         email: String::from("user3@example.com"),
         .._user1
     };
 
-    let _empty = Empty {};
+    let _empty: Empty = Empty {};
 
-    let _color = Color(0, 0, 0);
+    let _color: Color = Color(0, 0, 0);
 
-    let rect1 = Rectangle {
+    let rect1: Rectangle = Rectangle {
         width: 30,
         height: 50,
     };
 
     println!("rect1 is {:?}, area: {}", rect1, rect1.area());
 
-    let rect2 = Rectangle {
+    let rect2: Rectangle = Rectangle {
         width: 10,
         height: 40,
     };
-    let rect3 = Rectangle {
+    let rect3: Rectangle = Rectangle {
         width: 60,
         height: 45,
     };
-    let rect4 = Rectangle::square(20);
+    let rect4: Rectangle = Rectangle::square(20);
 
     println!("Can rect1 hold rect2? {}", rect1.can_hold(&rect2));
     println!("Can rect1 hold rect3? {}", rect1.can_hold(&rect3));
