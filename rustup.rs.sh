@@ -1,5 +1,6 @@
 #!/bin/sh
 # shellcheck shell=dash
+# shellcheck disable=SC2039  # local is non-POSIX
 
 # This is just a little script that can be downloaded from the internet to
 # install rustup. It just does platform detection, downloads the installer
@@ -8,14 +9,19 @@
 # It runs on Unix shells like {a,ba,da,k,z}sh. It uses the common `local`
 # extension. Note: Most shells limit `local` to 1 var per line, contra bash.
 
-if [ "$KSH_VERSION" = 'Version JM 93t+ 2010-03-05' ]; then
-    # The version of ksh93 that ships with many illumos systems does not
-    # support the "local" extension.  Print a message rather than fail in
-    # subtle ways later on:
-    echo 'rustup does not work with this ksh93 version; please try bash!' >&2
-    exit 1
-fi
+# Some versions of ksh have no `local` keyword. Alias it to `typeset`, but
+# beware this makes variables global with f()-style function syntax in ksh93.
+# mksh has this alias by default.
+has_local() {
+    # shellcheck disable=SC2034  # deliberately unused
+    local _has_local
+}
 
+has_local 2>/dev/null || alias local=typeset
+
+is_zsh() {
+    [ -n "${ZSH_VERSION-}" ]
+}
 
 set -u
 
@@ -25,48 +31,37 @@ RUSTUP_UPDATE_ROOT="${RUSTUP_UPDATE_ROOT:-https://static.rust-lang.org/rustup}"
 # NOTICE: If you change anything here, please make the same changes in setup_mode.rs
 usage() {
     cat <<EOF
-rustup-init 1.26.0 (577bf51ae 2023-04-05)
+rustup-init 1.27.1 (a8e4f5c64 2024-04-24)
+
 The installer for rustup
 
-USAGE:
-    rustup-init [OPTIONS]
+Usage: rustup-init[EXE] [OPTIONS]
 
-OPTIONS:
-    -v, --verbose
-            Enable verbose output
-
-    -q, --quiet
-            Disable progress output
-
-    -y
-            Disable confirmation prompt.
-
-        --default-host <default-host>
-            Choose a default host triple
-
-        --default-toolchain <default-toolchain>
-            Choose a default toolchain to install. Use 'none' to not install any toolchains at all
-
-        --profile <profile>
-            [default: default] [possible values: minimal, default, complete]
-
-    -c, --component <components>...
-            Component name to also install
-
-    -t, --target <targets>...
-            Target name to also install
-
-        --no-update-default-toolchain
-            Don't update any existing default toolchain after install
-
-        --no-modify-path
-            Don't configure the PATH environment variable
-
-    -h, --help
-            Print help information
-
-    -V, --version
-            Print version information
+Options:
+  -v, --verbose
+          Enable verbose output
+  -q, --quiet
+          Disable progress output
+  -y
+          Disable confirmation prompt.
+      --default-host <default-host>
+          Choose a default host triple
+      --default-toolchain <default-toolchain>
+          Choose a default toolchain to install. Use 'none' to not install any toolchains at all
+      --profile <profile>
+          [default: default] [possible values: minimal, default, complete]
+  -c, --component <components>...
+          Component name to also install
+  -t, --target <targets>...
+          Target name to also install
+      --no-update-default-toolchain
+          Don't update any existing default toolchain after install
+      --no-modify-path
+          Don't configure the PATH environment variable
+  -h, --help
+          Print help
+  -V, --version
+          Print version
 EOF
 }
 
@@ -85,9 +80,9 @@ main() {
 
     local _ext=""
     case "$_arch" in
-        *windows*)
-            _ext=".exe"
-            ;;
+    *windows*)
+        _ext=".exe"
+        ;;
     esac
 
     local _url="${RUSTUP_UPDATE_ROOT}/dist/${_arch}/rustup-init${_ext}"
@@ -104,8 +99,8 @@ main() {
     if [ -t 2 ]; then
         if [ "${TERM+set}" = 'set' ]; then
             case "$TERM" in
-                xterm*|rxvt*|urxvt*|linux*|vt*)
-                    _ansi_escapes_are_valid=true
+            xterm* | rxvt* | urxvt* | linux* | vt*)
+                _ansi_escapes_are_valid=true
                 ;;
             esac
         fi
@@ -115,33 +110,32 @@ main() {
     local need_tty=yes
     for arg in "$@"; do
         case "$arg" in
-            --help)
-                usage
-                exit 0
-                ;;
-            *)
-                OPTIND=1
-                if [ "${arg%%--*}" = "" ]; then
-                    # Long option (other than --help);
-                    # don't attempt to interpret it.
-                    continue
-                fi
-                while getopts :hy sub_arg "$arg"; do
-                    case "$sub_arg" in
-                        h)
-                            usage
-                            exit 0
-                            ;;
-                        y)
-                            # user wants to skip the prompt --
-                            # we don't need /dev/tty
-                            need_tty=no
-                            ;;
-                        *)
-                            ;;
-                        esac
-                done
-                ;;
+        --help)
+            usage
+            exit 0
+            ;;
+        *)
+            OPTIND=1
+            if [ "${arg%%--*}" = "" ]; then
+                # Long option (other than --help);
+                # don't attempt to interpret it.
+                continue
+            fi
+            while getopts :hy sub_arg "$arg"; do
+                case "$sub_arg" in
+                h)
+                    usage
+                    exit 0
+                    ;;
+                y)
+                    # user wants to skip the prompt --
+                    # we don't need /dev/tty
+                    need_tty=no
+                    ;;
+                *) ;;
+                esac
+            done
+            ;;
         esac
     done
 
@@ -169,7 +163,7 @@ main() {
             err "Unable to run interactively. Run with -y to accept defaults, --help for additional options"
         fi
 
-        ignore "$_file" "$@" < /dev/tty
+        ignore "$_file" "$@" </dev/tty
     else
         ignore "$_file" "$@"
     fi
@@ -185,7 +179,7 @@ main() {
 check_proc() {
     # Check for /proc by looking for the /proc/self/exe link
     # This is only run on Linux
-    if ! test -L /proc/self/exe ; then
+    if ! test -L /proc/self/exe; then
         err "fatal: Unable to find /proc/self/exe.  Is /proc mounted?  Installation cannot proceed without /proc."
     fi
 }
@@ -199,7 +193,7 @@ get_bitness() {
     # The printf builtin on some shells like dash only supports octal
     # escape sequences, so we use those.
     local _current_exe_head
-    _current_exe_head=$(head -c 5 /proc/self/exe )
+    _current_exe_head=$(head -c 5 /proc/self/exe)
     if [ "$_current_exe_head" = "$(printf '\177ELF\001')" ]; then
         echo 32
     elif [ "$_current_exe_head" = "$(printf '\177ELF\002')" ]; then
@@ -240,6 +234,67 @@ get_endianness() {
     fi
 }
 
+# Detect the Linux/LoongArch UAPI flavor, with all errors being non-fatal.
+# Returns 0 or 234 in case of successful detection, 1 otherwise (/tmp being
+# noexec, or other causes).
+check_loongarch_uapi() {
+    need_cmd base64
+
+    local _tmp
+    if ! _tmp="$(ensure mktemp)"; then
+        return 1
+    fi
+
+    # Minimal Linux/LoongArch UAPI detection, exiting with 0 in case of
+    # upstream ("new world") UAPI, and 234 (-EINVAL truncated) in case of
+    # old-world (as deployed on several early commercial Linux distributions
+    # for LoongArch).
+    #
+    # See https://gist.github.com/xen0n/5ee04aaa6cecc5c7794b9a0c3b65fc7f for
+    # source to this helper binary.
+    ignore base64 -d >"$_tmp" <<EOF
+f0VMRgIBAQAAAAAAAAAAAAIAAgEBAAAAeAAgAAAAAABAAAAAAAAAAAAAAAAAAAAAQQAAAEAAOAAB
+AAAAAAAAAAEAAAAFAAAAAAAAAAAAAAAAACAAAAAAAAAAIAAAAAAAJAAAAAAAAAAkAAAAAAAAAAAA
+AQAAAAAABCiAAwUAFQAGABUAByCAAwsYggMAACsAC3iBAwAAKwAxen0n
+EOF
+
+    ignore chmod u+x "$_tmp"
+    if [ ! -x "$_tmp" ]; then
+        ignore rm "$_tmp"
+        return 1
+    fi
+
+    "$_tmp"
+    local _retval=$?
+
+    ignore rm "$_tmp"
+    return "$_retval"
+}
+
+ensure_loongarch_uapi() {
+    check_loongarch_uapi
+    case $? in
+    0)
+        return 0
+        ;;
+    234)
+        echo >&2
+        echo 'Your Linux kernel does not provide the ABI required by this Rust' >&2
+        echo 'distribution.  Please check with your OS provider for how to obtain a' >&2
+        echo 'compatible Rust package for your system.' >&2
+        echo >&2
+        exit 1
+        ;;
+    *)
+        echo "Warning: Cannot determine current system's ABI flavor, continuing anyway." >&2
+        echo >&2
+        echo 'Note that the official Rust distribution only works with the upstream' >&2
+        echo 'kernel ABI.  Installation will fail if your running kernel happens to be' >&2
+        echo 'incompatible.' >&2
+        ;;
+    esac
+}
+
 get_architecture() {
     local _ostype _cputype _bitness _arch _clibtype
     _ostype="$(uname -s)"
@@ -255,10 +310,30 @@ get_architecture() {
         fi
     fi
 
-    if [ "$_ostype" = Darwin ] && [ "$_cputype" = i386 ]; then
-        # Darwin `uname -m` lies
-        if sysctl hw.optional.x86_64 | grep -q ': 1'; then
-            _cputype=x86_64
+    if [ "$_ostype" = Darwin ]; then
+        # Darwin `uname -m` can lie due to Rosetta shenanigans. If you manage to
+        # invoke a native shell binary and then a native uname binary, you can
+        # get the real answer, but that's hard to ensure, so instead we use
+        # `sysctl` (which doesn't lie) to check for the actual architecture.
+        if [ "$_cputype" = i386 ]; then
+            # Handling i386 compatibility mode in older macOS versions (<10.15)
+            # running on x86_64-based Macs.
+            # Starting from 10.15, macOS explicitly bans all i386 binaries from running.
+            # See: <https://support.apple.com/en-us/HT208436>
+
+            # Avoid `sysctl: unknown oid` stderr output and/or non-zero exit code.
+            if sysctl hw.optional.x86_64 2>/dev/null || true | grep -q ': 1'; then
+                _cputype=x86_64
+            fi
+        elif [ "$_cputype" = x86_64 ]; then
+            # Handling x86-64 compatibility mode (a.k.a. Rosetta 2)
+            # in newer macOS versions (>=11) running on arm64-based Macs.
+            # Rosetta 2 is built exclusively for x86-64 and cannot run i386 binaries.
+
+            # Avoid `sysctl: unknown oid` stderr output and/or non-zero exit code.
+            if sysctl hw.optional.arm64 2>/dev/null || true | grep -q ': 1'; then
+                _cputype=arm64
+            fi
         fi
     fi
 
@@ -282,69 +357,155 @@ get_architecture() {
 
     case "$_ostype" in
 
-        Android)
-            _ostype=linux-android
-            ;;
+    Android)
+        _ostype=linux-android
+        ;;
 
-        Linux)
-            check_proc
-            _ostype=unknown-linux-$_clibtype
-            _bitness=$(get_bitness)
-            ;;
+    Linux)
+        check_proc
+        _ostype=unknown-linux-$_clibtype
+        _bitness=$(get_bitness)
+        ;;
 
-        FreeBSD)
-            _ostype=unknown-freebsd
-            ;;
+    FreeBSD)
+        _ostype=unknown-freebsd
+        ;;
 
-        NetBSD)
-            _ostype=unknown-netbsd
-            ;;
+    NetBSD)
+        _ostype=unknown-netbsd
+        ;;
 
-        DragonFly)
-            _ostype=unknown-dragonfly
-            ;;
+    DragonFly)
+        _ostype=unknown-dragonfly
+        ;;
 
-        Darwin)
-            _ostype=apple-darwin
-            ;;
+    Darwin)
+        _ostype=apple-darwin
+        ;;
 
-        illumos)
-            _ostype=unknown-illumos
-            ;;
+    illumos)
+        _ostype=unknown-illumos
+        ;;
 
-        MINGW* | MSYS* | CYGWIN* | Windows_NT)
-            _ostype=pc-windows-gnu
-            ;;
+    MINGW* | MSYS* | CYGWIN* | Windows_NT)
+        _ostype=pc-windows-gnu
+        ;;
 
-        *)
-            err "unrecognized OS type: $_ostype"
-            ;;
+    *)
+        err "unrecognized OS type: $_ostype"
+        ;;
 
     esac
 
     case "$_cputype" in
 
-        i386 | i486 | i686 | i786 | x86)
-            _cputype=i686
-            ;;
+    i386 | i486 | i686 | i786 | x86)
+        _cputype=i686
+        ;;
 
-        xscale | arm)
-            _cputype=arm
-            if [ "$_ostype" = "linux-android" ]; then
-                _ostype=linux-androideabi
-            fi
-            ;;
+    xscale | arm)
+        _cputype=arm
+        if [ "$_ostype" = "linux-android" ]; then
+            _ostype=linux-androideabi
+        fi
+        ;;
 
-        armv6l)
-            _cputype=arm
-            if [ "$_ostype" = "linux-android" ]; then
-                _ostype=linux-androideabi
-            else
-                _ostype="${_ostype}eabihf"
-            fi
-            ;;
+    armv6l)
+        _cputype=arm
+        if [ "$_ostype" = "linux-android" ]; then
+            _ostype=linux-androideabi
+        else
+            _ostype="${_ostype}eabihf"
+        fi
+        ;;
 
-        armv7l | armv8l)
+    armv7l | armv8l)
+        _cputype=armv7
+        if [ "$_ostype" = "linux-android" ]; then
+            _ostype=linux-androideabi
+        else
+            _ostype="${_ostype}eabihf"
+        fi
+        ;;
+
+    aarch64 | arm64)
+        _cputype=aarch64
+        ;;
+
+    x86_64 | x86-64 | x64 | amd64)
+        _cputype=x86_64
+        ;;
+
+    mips)
+        _cputype=$(get_endianness mips '' el)
+        ;;
+
+    mips64)
+        if [ "$_bitness" -eq 64 ]; then
+            # only n64 ABI is supported for now
+            _ostype="${_ostype}abi64"
+            _cputype=$(get_endianness mips64 '' el)
+        fi
+        ;;
+
+    ppc)
+        _cputype=powerpc
+        ;;
+
+    ppc64)
+        _cputype=powerpc64
+        ;;
+
+    ppc64le)
+        _cputype=powerpc64le
+        ;;
+
+    s390x)
+        _cputype=s390x
+        ;;
+    riscv64)
+        _cputype=riscv64gc
+        ;;
+    loongarch64)
+        _cputype=loongarch64
+        ensure_loongarch_uapi
+        ;;
+    *)
+        err "unknown CPU type: $_cputype"
+        ;;
+
+    esac
+
+    # Detect 64-bit linux with 32-bit userland
+    if [ "${_ostype}" = unknown-linux-gnu ] && [ "${_bitness}" -eq 32 ]; then
+        case $_cputype in
+        x86_64)
+            if [ -n "${RUSTUP_CPUTYPE:-}" ]; then
+                _cputype="$RUSTUP_CPUTYPE"
+            else {
+                # 32-bit executable for amd64 = x32
+                if is_host_amd64_elf; then {
+                    echo "This host is running an x32 userland; as it stands, x32 support is poor," 1>&2
+                    echo "and there isn't a native toolchain -- you will have to install" 1>&2
+                    echo "multiarch compatibility with i686 and/or amd64, then select one" 1>&2
+                    echo "by re-running this script with the RUSTUP_CPUTYPE environment variable" 1>&2
+                    echo "set to i686 or x86_64, respectively." 1>&2
+                    echo 1>&2
+                    echo "You will be able to add an x32 target after installation by running" 1>&2
+                    echo "  rustup target add x86_64-unknown-linux-gnux32" 1>&2
+                    exit 1
+                }; else
+                    _cputype=i686
+                fi
+            }; fi
+            ;;
+        mips64)
+            _cputype=$(get_endianness mips '' el)
+            ;;
+        powerpc64)
+            _cputype=powerpc
+            ;;
+        aarch64)
             _cputype=armv7
             if [ "$_ostype" = "linux-android" ]; then
                 _ostype=linux-androideabi
@@ -352,93 +513,9 @@ get_architecture() {
                 _ostype="${_ostype}eabihf"
             fi
             ;;
-
-        aarch64 | arm64)
-            _cputype=aarch64
+        riscv64gc)
+            err "riscv64 with 32-bit userland unsupported"
             ;;
-
-        x86_64 | x86-64 | x64 | amd64)
-            _cputype=x86_64
-            ;;
-
-        mips)
-            _cputype=$(get_endianness mips '' el)
-            ;;
-
-        mips64)
-            if [ "$_bitness" -eq 64 ]; then
-                # only n64 ABI is supported for now
-                _ostype="${_ostype}abi64"
-                _cputype=$(get_endianness mips64 '' el)
-            fi
-            ;;
-
-        ppc)
-            _cputype=powerpc
-            ;;
-
-        ppc64)
-            _cputype=powerpc64
-            ;;
-
-        ppc64le)
-            _cputype=powerpc64le
-            ;;
-
-        s390x)
-            _cputype=s390x
-            ;;
-        riscv64)
-            _cputype=riscv64gc
-            ;;
-        loongarch64)
-            _cputype=loongarch64
-            ;;
-        *)
-            err "unknown CPU type: $_cputype"
-
-    esac
-
-    # Detect 64-bit linux with 32-bit userland
-    if [ "${_ostype}" = unknown-linux-gnu ] && [ "${_bitness}" -eq 32 ]; then
-        case $_cputype in
-            x86_64)
-                if [ -n "${RUSTUP_CPUTYPE:-}" ]; then
-                    _cputype="$RUSTUP_CPUTYPE"
-                else {
-                    # 32-bit executable for amd64 = x32
-                    if is_host_amd64_elf; then {
-                         echo "This host is running an x32 userland; as it stands, x32 support is poor," 1>&2
-                         echo "and there isn't a native toolchain -- you will have to install" 1>&2
-                         echo "multiarch compatibility with i686 and/or amd64, then select one" 1>&2
-                         echo "by re-running this script with the RUSTUP_CPUTYPE environment variable" 1>&2
-                         echo "set to i686 or x86_64, respectively." 1>&2
-                         echo 1>&2
-                         echo "You will be able to add an x32 target after installation by running" 1>&2
-                         echo "  rustup target add x86_64-unknown-linux-gnux32" 1>&2
-                         exit 1
-                    }; else
-                        _cputype=i686
-                    fi
-                }; fi
-                ;;
-            mips64)
-                _cputype=$(get_endianness mips '' el)
-                ;;
-            powerpc64)
-                _cputype=powerpc
-                ;;
-            aarch64)
-                _cputype=armv7
-                if [ "$_ostype" = "linux-android" ]; then
-                    _ostype=linux-androideabi
-                else
-                    _ostype="${_ostype}eabihf"
-                fi
-                ;;
-            riscv64gc)
-                err "riscv64 with 32-bit userland unsupported"
-                ;;
         esac
     fi
 
@@ -446,8 +523,8 @@ get_architecture() {
     # and fall back to arm.
     # See https://github.com/rust-lang/rustup.rs/issues/587.
     if [ "$_ostype" = "unknown-linux-gnueabihf" ] && [ "$_cputype" = armv7 ]; then
-        if ensure grep '^Features' /proc/cpuinfo | grep -q -v neon; then
-            # At least one processor does not have NEON.
+        if ensure grep '^Features' /proc/cpuinfo | grep -E -q -v 'neon|simd'; then
+            # At least one processor does not have NEON (which is asimd on armv8+).
             _cputype=arm
         fi
     fi
@@ -473,7 +550,7 @@ need_cmd() {
 }
 
 check_cmd() {
-    command -v "$1" > /dev/null 2>&1
+    command -v "$1" >/dev/null 2>&1
 }
 
 assert_nz() {
@@ -497,6 +574,9 @@ ignore() {
 # This wraps curl or wget. Try curl first, if not installed,
 # use wget instead.
 downloader() {
+    # zsh does not split words by default, Required for curl retry arguments below.
+    is_zsh && setopt local_options shwordsplit
+
     local _dld
     local _ciphersuites
     local _err
@@ -539,7 +619,7 @@ downloader() {
         fi
         return $_status
     elif [ "$_dld" = wget ]; then
-        if [ "$(wget -V 2>&1|head -2|tail -1|cut -f1 -d" ")" = "BusyBox" ]; then
+        if [ "$(wget -V 2>&1 | head -2 | tail -1 | cut -f1 -d" ")" = "BusyBox" ]; then
             echo "Warning: using the BusyBox version of wget.  Not enforcing strong cipher suites for TLS or TLS v1.2, this is potentially less secure"
             _err=$(wget "$1" -O "$2" 2>&1)
             _status=$?
@@ -569,7 +649,7 @@ downloader() {
         fi
         return $_status
     else
-        err "Unknown downloader"   # should not reach here
+        err "Unknown downloader" # should not reach here
     fi
 }
 
@@ -584,33 +664,33 @@ check_help_for() {
 
     local _category
     if "$_cmd" --help | grep -q 'For all options use the manual or "--help all".'; then
-      _category="all"
+        _category="all"
     else
-      _category=""
+        _category=""
     fi
 
     case "$_arch" in
 
-        *darwin*)
+    *darwin*)
         if check_cmd sw_vers; then
             case $(sw_vers -productVersion) in
-                10.*)
-                    # If we're running on macOS, older than 10.13, then we always
-                    # fail to find these options to force fallback
-                    if [ "$(sw_vers -productVersion | cut -d. -f2)" -lt 13 ]; then
-                        # Older than 10.13
-                        echo "Warning: Detected macOS platform older than 10.13"
-                        return 1
-                    fi
-                    ;;
-                11.*)
-                    # We assume Big Sur will be OK for now
-                    ;;
-                *)
-                    # Unknown product version, warn and continue
-                    echo "Warning: Detected unknown macOS major version: $(sw_vers -productVersion)"
-                    echo "Warning TLS capabilities detection may fail"
-                    ;;
+            10.*)
+                # If we're running on macOS, older than 10.13, then we always
+                # fail to find these options to force fallback
+                if [ "$(sw_vers -productVersion | cut -d. -f2)" -lt 13 ]; then
+                    # Older than 10.13
+                    echo "Warning: Detected macOS platform older than 10.13"
+                    return 1
+                fi
+                ;;
+            11.*)
+                # We assume Big Sur will be OK for now
+                ;;
+            *)
+                # Unknown product version, warn and continue
+                echo "Warning: Detected unknown macOS major version: $(sw_vers -productVersion)"
+                echo "Warning TLS capabilities detection may fail"
+                ;;
             esac
         fi
         ;;
