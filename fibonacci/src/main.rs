@@ -2,7 +2,7 @@ fn main() {
     let mut input = String::new();
     let mut fibonacci = fibonacci_generator();
 
-    let mut i = 0;
+    let mut i: u32 = 0;
     loop {
         input.clear();
 
@@ -36,7 +36,7 @@ fn fibonacci_generator() -> impl FnMut() -> Option<u128> {
     // This is a closure that captures the variables a and b from the outer scope.
     // move keyword is used to transfer ownership of the variables a and b to the closure.
     return move || {
-        let next = a;
+        let next: u128 = a;
         return match a.checked_add(b) {
             Some(sum) => {
                 a = b;
