@@ -1,3 +1,22 @@
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_first_word() {
+        let s = "hello world";
+        let result = first_word(s);
+        assert_eq!(result, "hello", "Expected 'hello' but got '{}'", result);
+    }
+
+    #[test]
+    fn test_last_word() {
+        let s = "hello world";
+        let result = last_word(s);
+        assert_eq!(result, "world", "Expected 'world' but got '{}'", result);
+    }
+}
+
 fn main() {
     let mut my_string = String::from("hello world");
 
@@ -15,7 +34,7 @@ fn main() {
 // slices are references to a part of a string
 // slices have a type &[T]
 // we return a slice of the string
-fn x_word(s: &str, last: bool) -> &str {
+fn x_word<'a>(s: &'a str, last: bool) -> &str {
     let s = s.trim(); // Remove leading and trailing whitespace
     if last {
         // Find the last occurrence of a space
@@ -32,10 +51,10 @@ fn x_word(s: &str, last: bool) -> &str {
     }
 }
 
-fn first_word(s: &str) -> &str {
+fn first_word<'a>(s: &'a str) -> &str {
     return x_word(s, false);
 }
 
-fn last_word(s: &str) -> &str {
+fn last_word<'a>(s: &'a str) -> &str {
     return x_word(s, true);
 }

@@ -1,6 +1,6 @@
 use once_cell::sync::Lazy;
 use std::collections::HashMap;
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 
 fn main() {
     println!("Enter department name and employee name separated by a space:");
@@ -27,11 +27,12 @@ fn main() {
     }
 }
 
-static DEPARTMENTS: Lazy<Mutex<HashMap<String, Vec<String>>>> =
-    Lazy::new(|| Mutex::new(HashMap::new()));
+static DEPARTMENTS: Lazy<Arc<Mutex<HashMap<String, Vec<String>>>>> =
+    Lazy::new(|| Arc::new(Mutex::new(HashMap::new())));
 
 fn add_employee(department: &str, employee: &str) {
-    let mut departments = DEPARTMENTS.lock().unwrap();
+    let departments = Arc::clone(&DEPARTMENTS);
+    let mut departments = departments.lock().unwrap();
     departments
         .entry(department.to_string())
         .or_insert(Vec::new())
@@ -39,12 +40,14 @@ fn add_employee(department: &str, employee: &str) {
 }
 
 fn list_departments() -> Vec<String> {
-    let departments = DEPARTMENTS.lock().unwrap();
+    let departments = Arc::clone(&DEPARTMENTS);
+    let departments = departments.lock().unwrap();
     departments.keys().cloned().collect()
 }
 
 fn list_employees(department: &str) -> Option<Vec<String>> {
-    let departments = DEPARTMENTS.lock().unwrap();
+    let departments = Arc::clone(&DEPARTMENTS);
+    let departments = departments.lock().unwrap();
     departments
         .get(department)
         .map(|employees| employees.clone())

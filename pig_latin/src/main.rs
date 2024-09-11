@@ -1,5 +1,40 @@
+use std::io::stdin;
+
+#[cfg(test)]
+mod tests {
+    use super::{convert_word, convert_words};
+
+    #[test]
+    fn test_convert_word() {
+        let helper = |word: &str, expected: &str| {
+            let result = convert_word(word);
+            assert_eq!(
+                result, expected,
+                "Expected '{}' but got '{}'",
+                expected, result
+            );
+        };
+
+        // spell-checker:ignore (words) ellohay apple orldway
+        helper("hello", "ellohay");
+        helper("apple", "apple");
+        helper("world", "orldway");
+    }
+
+    #[test]
+    fn test_convert_words() {
+        // spell-checker:ignore (words) ellohay apple orldway
+        assert_eq!(convert_words("hello apple world"), "ellohay apple orldway");
+    }
+}
+
 fn main() {
-    println!("{}", convert_words("Hello, world!"));
+    println!("Enter a sentence:");
+
+    let mut sentence = String::new();
+    stdin().read_line(&mut sentence).unwrap();
+
+    println!("{}", convert_words(&sentence));
 }
 
 static VOWELS: [char; 5] = ['a', 'e', 'i', 'o', 'u'];
