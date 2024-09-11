@@ -12,10 +12,9 @@ fn main() {
         match address {
             IpAddr::V4(ip) => println!("IPv4 address: {:>31}", ip.to_string()),
             IpAddr::V4Network(ip) => println!(
-                "IPv4 network: {:>31} ({}, {}, {} - {})",
+                "IPv4 network: {:>31} ({}, {} - {})",
                 ip.to_string(),
                 ip.mask().to_string(),
-                ip.contains(&IpV4Addr::from("192.168.20.16")),
                 ip.first_address().to_string(),
                 ip.last_address().to_string()
             ),
@@ -134,9 +133,11 @@ impl IpV4Network {
     }
 
     fn new(address: IpV4Addr, prefix: u8) -> IpV4Network {
+        let raw = address.to_string();
         let mut net = IpV4Network { address, prefix };
-        net.address = net.network_address();
         net.prefix = if net.prefix > 32 { 32 } else { net.prefix };
+        net.address = net.network_address();
+        assert!(net.contains(&IpV4Addr::from(&raw)));
         net
     }
 

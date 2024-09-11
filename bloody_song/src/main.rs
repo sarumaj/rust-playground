@@ -2,7 +2,7 @@ fn main() {
     for i in 1..=12 {
         println!(
             "On the {} day of Christmas my true love sent to me",
-            numeral(i).unwrap_or("unknown month")
+            cardinal(i).unwrap_or("unknown month")
         );
 
         for j in (1..=i).rev() {
@@ -21,7 +21,7 @@ fn main() {
     }
 }
 
-fn numeral(n: u32) -> Option<&'static str> {
+fn cardinal(n: u32) -> Option<&'static str> {
     return match n {
         1 => Some("first"),
         2 => Some("second"),

@@ -39,6 +39,7 @@ pub fn take_orders() {
 pub fn take_payments() -> f64 {
     let mut tables = iter_tables();
     let mut sum = 0.0;
+
     println!("Taking payments:\n");
     println!("{:12}{:12}{}", "Customer", "Table No.", "Total");
     for table in tables.iter_mut() {
@@ -53,5 +54,6 @@ pub fn take_payments() -> f64 {
         table.release();
     }
     println!("");
+
     sum
 }
