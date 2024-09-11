@@ -25,7 +25,7 @@ pub fn add_to_wait_list(customer: Customer) {
 pub fn add_table(capacity: u32) {
     let mut tables = TABLES.lock().unwrap();
     let table_number = match tables.last() {
-        Some(table) => table.number+1,
+        Some(table) => table.number + 1,
         None => 1,
     };
     tables.push(Table::new(table_number, capacity));

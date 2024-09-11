@@ -5,10 +5,13 @@
 ## Projects:
 
 - [bloody song](bloody_song): A program displaying lyrics of a bloody Christmas song using smart repetitions.
-- [bricks](bricks): A small programm to build a wall with bricks.
+- [bricks](bricks): A small program to build a wall with bricks.
+- [company directory](company_directory): A simple program using a hash map to store employees by departments.
 - [fibonacci](fibonacci): A Fibonacci series generator.
-- [first word](first_word): A programm disasembling the first and the last words of a sentence.
+- [first word](first_word): A program disassembling the first and the last words of a sentence.
 - [guessing game](guessing_game): Initial project about an interactive guess a number game.
 - [ip address](ip_address): My implementation of IP v4 and IP v6.
+- [maths](maths): A program calculating mean, median, mode and standard deviation given a vector of integers.
+- [pig latin](pig_latin): A program converting an input text to pig latin.
 - [restaurant](restaurant): First project using multiple crates and modules, using both a lib and a bin crate. It mocks a restaurant with specified menu, limited capacity, and a revenue expectation.
-- [temp conv](temp_conv): A simple interactive temperature coverter (°C to °F and vice versa).
+- [temp conv](temp_conv): A simple interactive temperature converter (°C to °F and vice versa).
