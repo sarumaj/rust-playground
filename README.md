@@ -8,6 +8,7 @@
 - [bricks](bricks): A small program to build a wall with bricks.
 - [company directory](company_directory): A simple program using a hash map to store employees by departments.
 - [fibonacci](fibonacci): A Fibonacci series generator.
+- [file handler](file_handler): A simple dialog allowing to delete a file, create it from scratch or append content to existing file.
 - [first word](first_word): A program disassembling the first and the last words of a sentence.
 - [guessing game](guessing_game): Initial project about an interactive guess a number game.
 - [ip address](ip_address): My implementation of IP v4 and IP v6.
