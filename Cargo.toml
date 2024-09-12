@@ -5,14 +5,16 @@ members = [
     "company_directory",
     "fibonacci" ,
     "file_handler",
-    "first_word", "forest",
+    "first_word", 
+    "forest",
     "guessing_game",
     "ip_address",
     "maths", 
     "messenger",
     "minigrep",
     "pig_latin",
-    "restaurant",
+    "restaurant", 
+    "tasker",
     "temp_conv"
 ]
 
