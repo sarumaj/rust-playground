@@ -1,13 +1,13 @@
 [workspace]
 
-members = [
+members = [ "avg", "blogger",
     "bloody_song",
     "company_directory",
     "fibonacci" ,
     "file_handler",
     "first_word", 
     "forest",
-    "guessing_game",
+    "guessing_game", "gui",
     "ip_address",
     "maths", 
     "messenger",
