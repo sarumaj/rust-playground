@@ -5,8 +5,10 @@ use once_cell::sync::Lazy;
 use std::sync::Mutex;
 use table::Table;
 
+/// This is a static, yet expandable vector that holds the list of customers waiting to be seated.
 static QUEUE: Lazy<Mutex<Vec<Customer>>> = Lazy::new(|| Mutex::new(Vec::new()));
 
+/// This is a static, yet expandable vector that holds the list of tables in the restaurant.
 static TABLES: Lazy<Mutex<Vec<Table>>> = Lazy::new(|| {
     let mut tables = Vec::new();
     tables.push(Table::new(1, 4));
@@ -17,11 +19,14 @@ static TABLES: Lazy<Mutex<Vec<Table>>> = Lazy::new(|| {
     Mutex::new(tables)
 });
 
+/// This function is used to add a customer to the wait list.
 pub fn add_to_wait_list(customer: Customer) {
     let mut queue = QUEUE.lock().unwrap();
     queue.push(customer);
 }
 
+/// This function is used to add a table to the restaurant.
+/// It takes the capacity of the table as an argument.
 pub fn add_table(capacity: u32) {
     let mut tables = TABLES.lock().unwrap();
     let table_number = match tables.last() {
@@ -31,10 +36,14 @@ pub fn add_table(capacity: u32) {
     tables.push(Table::new(table_number, capacity));
 }
 
+/// This function is used to get a reference to the list of tables.
 pub fn iter_tables() -> std::sync::MutexGuard<'static, Vec<Table>> {
     TABLES.lock().unwrap()
 }
 
+/// This function is used to process the wait list and seat customers at available tables.
+/// It assigns customers to tables based on availability and removes them from the wait list.
+/// It prints the assigned tables and customers.
 pub fn process_wait_list() {
     let mut queue = QUEUE.lock().unwrap();
     let mut tables = TABLES.lock().unwrap();

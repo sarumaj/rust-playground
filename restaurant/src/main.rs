@@ -43,7 +43,7 @@ fn main() {
     loop {
         process_wait_list();
 
-        take_orders();
+        take_orders(true);
 
         serve_orders();
 

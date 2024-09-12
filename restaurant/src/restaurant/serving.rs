@@ -2,8 +2,10 @@ pub mod menu;
 
 use super::hosting::iter_tables;
 pub use menu::extend_menu;
-use menu::get_random_order;
+use menu::{ask_for_order, get_random_order};
 
+/// This function serves the orders for all the tables.
+/// It prints the orders for each customer at each table.
 pub fn serve_orders() {
     let tables = iter_tables();
     println!("Serving orders:\n");
@@ -27,15 +29,25 @@ pub fn serve_orders() {
     println!("");
 }
 
-pub fn take_orders() {
+/// This function takes orders for all the customers at all the tables.
+/// It assigns can either ask for orders or generate random orders.
+pub fn take_orders(random: bool) {
     let mut tables = iter_tables();
     for table in tables.iter_mut() {
         for customer in table.guests.iter_mut() {
-            get_random_order(customer);
+            if random {
+                get_random_order(customer);
+            } else {
+                ask_for_order(customer);
+            }
         }
     }
 }
 
+/// This function takes payments for all the customers at all the tables.
+/// It prints the total amount to be paid by each customer.
+/// It also releases the tables after taking payments.
+/// It returns the total amount collected.
 pub fn take_payments() -> f64 {
     let mut tables = iter_tables();
     let mut sum = 0.0;
