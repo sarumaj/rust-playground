@@ -1,0 +1,24 @@
+[workspace]
+
+members = [
+    "bloody_song",
+    "company_directory",
+    "fibonacci" ,
+    "file_handler",
+    "first_word",
+    "guessing_game",
+    "ip_address",
+    "maths",
+    "minigrep",
+    "pig_latin",
+    "restaurant",
+    "temp_conv"
+]
+
+resolver = "2"
+
+[source.crates-io]
+replace-with = "vendored-sources"
+
+[source.vendored-sources]
+directory = "vendor"
