@@ -16,6 +16,6 @@ members = [ "avg", "blogger",
     "restaurant", 
     "tasker",
     "temp_conv"
-, "zoo"]
+, "www", "zoo"]
 
 resolver = "2"

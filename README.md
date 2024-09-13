@@ -24,4 +24,5 @@
 - [restaurant](restaurant): First project using multiple crates and modules, using both a lib and a bin crate. It mocks a restaurant with specified menu, limited capacity, and a revenue expectation.
 - [tasker](tasker): A simple multi-threaded application.
 - [temp conv](temp_conv): A simple interactive temperature converter (°C to °F and vice versa).
+- [www](www): A multi-threaded web server using own thread pool implementation.
 - [zoo](zoo): A program using super traits and the new type pattern to implement them.
