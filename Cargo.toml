@@ -8,7 +8,7 @@ members = [ "avg", "blogger",
     "first_word", 
     "forest",
     "guessing_game", "gui",
-    "ip_address",
+    "ip_address", "lin_alg",
     "maths", 
     "messenger",
     "minigrep",
@@ -16,6 +16,6 @@ members = [ "avg", "blogger",
     "restaurant", 
     "tasker",
     "temp_conv"
-]
+, "zoo"]
 
 resolver = "2"

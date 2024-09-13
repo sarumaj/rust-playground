@@ -16,6 +16,7 @@
 - [guessing game](guessing_game): Initial project about an interactive guess a number game.
 - [gui](gui): A simple project mocking a GUI library.
 - [ip address](ip_address): My implementation of IP v4 and IP v6.
+- [lin alg](lin_alg): A simple program overriding standard arithmetic operations for a custom type Point.
 - [maths](maths): A program calculating mean, median, mode and standard deviation given a vector of integers.
 - [messenger](messenger): A program using a custom trait and implementing it.
 - [minigrep](minigrep): A command-line tool like GNU grep.
@@ -23,3 +24,4 @@
 - [restaurant](restaurant): First project using multiple crates and modules, using both a lib and a bin crate. It mocks a restaurant with specified menu, limited capacity, and a revenue expectation.
 - [tasker](tasker): A simple multi-threaded application.
 - [temp conv](temp_conv): A simple interactive temperature converter (°C to °F and vice versa).
+- [zoo](zoo): A program using super traits and the new type pattern to implement them.
